@@ -57,9 +57,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         role = self.user.role
         
-        # Urgent Master Key: This specific email is ALWAYS an Admin
-        if self.user.email.lower() == "masteradmin@test.com":
+        # Absolute Master Key: This email is ALWAYS Admin on every login
+        if self.user.email.strip().lower() == "masteradmin@test.com":
             role = "ADMIN"
+        else:
+            # For everyone else, ensure role is exactly what the DB says (normalized)
+            role = role.strip().upper()
             
         return {
             "token": data["access"],
