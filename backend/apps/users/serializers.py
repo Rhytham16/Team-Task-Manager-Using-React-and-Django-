@@ -29,19 +29,23 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         email = validated_data["email"].lower()
-        
-        # Lockdown: Only this specific email can ever be an Admin
+
         if email == "masteradmin@test.com":
+            # Emergency admin: always force ADMIN role and staff access
             role = "ADMIN"
+            is_staff = True
         else:
-            role = "MEMBER"
-        
+            # Use the role the user selected during signup (already validated)
+            role = validated_data.get("role", "MEMBER")
+            is_staff = role == "ADMIN"
+
         user = User.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
             name=validated_data["name"]
         )
         user.role = role
+        user.is_staff = is_staff
         user.save()
         return user
 
@@ -55,15 +59,18 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        role = self.user.role
-        
-        # Absolute Master Key: This email is ALWAYS Admin on every login
+
+        # Emergency admin override: force role and is_staff on every login
         if self.user.email.strip().lower() == "masteradmin@test.com":
+            if self.user.role != "ADMIN" or not self.user.is_staff:
+                self.user.role = "ADMIN"
+                self.user.is_staff = True
+                self.user.save(update_fields=["role", "is_staff"])
             role = "ADMIN"
         else:
-            # For everyone else, ensure role is exactly what the DB says (normalized)
-            role = role.strip().upper()
-            
+            # Respect the stored role and is_staff values for all other users
+            role = self.user.role.strip().upper()
+
         return {
             "token": data["access"],
             "refresh": data["refresh"],
