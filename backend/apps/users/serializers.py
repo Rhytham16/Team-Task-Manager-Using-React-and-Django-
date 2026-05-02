@@ -28,17 +28,19 @@ class SignupSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        requested_role = self.validate_role(validated_data.get("role", "MEMBER"))
-        # Honor the requested role from signup.
-        # WARNING: This allows anyone to self-select ADMIN.
-        role = requested_role
+        email = validated_data["email"].lower()
+        
+        # Lockdown: Only this specific email can ever be an Admin
+        if email == "masteradmin@test.com":
+            role = "ADMIN"
+        else:
+            role = "MEMBER"
         
         user = User.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
             name=validated_data["name"]
         )
-        # Force the role and save again to be 100% sure
         user.role = role
         user.save()
         return user
