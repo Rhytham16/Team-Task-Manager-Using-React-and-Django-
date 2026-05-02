@@ -20,15 +20,16 @@ class SignupSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        # Simply take the role from the request, defaulting to MEMBER if not provided
         role = validated_data.get("role", "MEMBER")
         
         user = User.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
-            name=validated_data["name"],
-            role=role
+            name=validated_data["name"]
         )
+        # Force the role and save again to be 100% sure
+        user.role = role
+        user.save()
         return user
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
