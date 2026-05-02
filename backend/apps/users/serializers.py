@@ -14,13 +14,21 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ("name", "email", "password", "role")
 
+    def validate_role(self, value):
+        # Be tolerant of different casings coming from the client/deployments.
+        role = (value or "MEMBER").strip().upper()
+        valid_roles = {choice[0] for choice in User.ROLE_CHOICES}
+        if role not in valid_roles:
+            return "MEMBER"
+        return role
+
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists.")
         return value
 
     def create(self, validated_data):
-        role = validated_data.get("role", "MEMBER")
+        role = self.validate_role(validated_data.get("role", "MEMBER"))
         
         user = User.objects.create_user(
             email=validated_data["email"],

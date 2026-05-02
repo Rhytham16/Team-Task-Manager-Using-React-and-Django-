@@ -5,11 +5,13 @@ class IsProjectAdmin(permissions.BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        return bool(request.user.role == "ADMIN" or obj.created_by == request.user)
+        role = (getattr(request.user, "role", "") or "").strip().upper()
+        return bool(role == "ADMIN" or obj.created_by == request.user)
 
 class IsProjectMember(permissions.BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        return bool(request.user.role == "ADMIN" or obj.team_members.filter(id=request.user.id).exists())
+        role = (getattr(request.user, "role", "") or "").strip().upper()
+        return bool(role == "ADMIN" or obj.team_members.filter(id=request.user.id).exists())

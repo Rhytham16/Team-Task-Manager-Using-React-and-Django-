@@ -6,6 +6,7 @@ class TaskPermission(permissions.BasePermission):
     Member -> only assigned tasks
     """
     def has_object_permission(self, request, view, obj):
-        if request.user.role == "ADMIN":
+        role = (getattr(request.user, "role", "") or "").strip().upper()
+        if role == "ADMIN":
             return True
         return obj.assigned_to.filter(id=request.user.id).exists()
