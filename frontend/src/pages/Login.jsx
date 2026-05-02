@@ -17,7 +17,9 @@ function Login() {
     try {
       const response = await api.post('/api/auth/login/', { email, password });
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password');

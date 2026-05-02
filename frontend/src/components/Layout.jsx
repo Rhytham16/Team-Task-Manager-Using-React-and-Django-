@@ -3,7 +3,19 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 function Layout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const getUser = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== 'undefined') {
+        return JSON.parse(userStr);
+      }
+    } catch (e) {
+      console.error("Failed to parse user data", e);
+    }
+    return {};
+  };
+
+  const user = getUser();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
