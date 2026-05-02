@@ -6,7 +6,18 @@ function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const getUser = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== 'undefined') {
+        return JSON.parse(userStr);
+      }
+    } catch (e) {
+      console.error("Failed to parse user data", e);
+    }
+    return {};
+  };
+  const user = getUser();
   const isAdmin = user.role === 'ADMIN';
 
   const fetchData = async () => {
