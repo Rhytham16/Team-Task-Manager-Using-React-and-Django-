@@ -26,6 +26,8 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if not user or not user.is_authenticated:
+            return Task.objects.none()
         if user.role == "ADMIN":
             queryset = Task.objects.all()
         else:

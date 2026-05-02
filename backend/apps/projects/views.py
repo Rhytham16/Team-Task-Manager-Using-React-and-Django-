@@ -22,6 +22,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if not user or not user.is_authenticated:
+            return Project.objects.none()
         if user.role == "ADMIN":
             return Project.objects.all()
         return Project.objects.filter(team_members=user)
