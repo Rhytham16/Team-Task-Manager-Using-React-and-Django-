@@ -103,7 +103,7 @@ class DashboardView(views.APIView):
             global_breakdown = {item["status"]: item["count"] for item in global_status_counts}
             
             response_data["global_stats"] = {
-                "total_members": User.objects.filter(role="MEMBER").count(),
+                "total_members": User.objects.filter(role__iexact="MEMBER").count(),
                 "total_projects": Project.objects.count(),
                 "total_tasks": Task.objects.count(),
                 "TODO": global_breakdown.get("TODO", 0),
@@ -113,6 +113,6 @@ class DashboardView(views.APIView):
             global_recent_tasks = Task.objects.all().order_by("-created_at")[:5]
             
             response_data["recent_global_tasks"] = TaskSerializer(global_recent_tasks, many=True).data
-            response_data["global_members"] = User.objects.filter(role="MEMBER").values("id", "name", "email")
+            response_data["global_members"] = User.objects.filter(role__iexact="MEMBER").values("id", "name", "email")
             
         return Response(response_data)

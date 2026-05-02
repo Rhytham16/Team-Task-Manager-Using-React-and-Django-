@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
+import { getTokenRole, isAdminRole } from '../auth';
 
 function ProjectDetails() {
   const { id } = useParams();
@@ -35,7 +36,8 @@ function ProjectDetails() {
     return {};
   };
   const user = getUser();
-  const isAdmin = user.role === 'ADMIN';
+  const effectiveRole = user.role || getTokenRole() || '';
+  const isAdmin = isAdminRole(effectiveRole);
 
   const fetchData = async () => {
     try {
@@ -527,4 +529,3 @@ function ProjectDetails() {
 }
 
 export default ProjectDetails;
-

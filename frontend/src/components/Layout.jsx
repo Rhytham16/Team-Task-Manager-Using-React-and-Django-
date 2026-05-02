@@ -1,4 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { getTokenRole, isAdminRole } from '../auth';
 
 function Layout({ children }) {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function Layout({ children }) {
   };
 
   const user = getUser();
+  const effectiveRole = user.role || getTokenRole() || '';
+  const isAdmin = isAdminRole(effectiveRole);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -32,26 +35,26 @@ function Layout({ children }) {
           <span style={{ fontSize: '28px' }}>🏠</span>
           Team-Task-Manager
         </h2>
-
+        
         <div className="sidebar-nav">
           <Link to="/" className={isActive('/')}>Dashboard Overview</Link>
           <Link to="/projects" className={isActive('/projects')}>All Projects</Link>
           <Link to="/tasks" className={isActive('/tasks')}>My Assignments</Link>
         </div>
-
+        
         <div style={{ marginTop: 'auto', paddingTop: '40px', borderTop: '1px solid rgba(138, 98, 98, 0.1)' }}>
           <div style={{ marginBottom: '24px' }}>
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>Logged in as</p>
             <p style={{ fontWeight: '700', color: 'var(--primary)' }}>{user.name || user.email || 'User'}</p>
-            <span className="status-badge" style={{
-              fontSize: '10px',
-              padding: '4px 8px',
-              marginTop: '8px',
+            <span className="status-badge" style={{ 
+              fontSize: '10px', 
+              padding: '4px 8px', 
+              marginTop: '8px', 
               display: 'inline-block',
-              background: user.role === 'ADMIN' ? 'var(--accent-light)' : '#f3f4f6',
-              color: user.role === 'ADMIN' ? 'var(--primary)' : '#4b5563'
+              background: isAdmin ? 'var(--accent-light)' : '#f3f4f6',
+              color: isAdmin ? 'var(--primary)' : '#4b5563'
             }}>
-              {user.role === 'ADMIN' ? 'Administrator' : 'Team Member'}
+              {isAdmin ? 'Administrator' : 'Team Member'}
             </span>
           </div>
           <button className="btn btn-secondary" onClick={handleLogout} style={{ width: '100%', justifyContent: 'center' }}>
@@ -59,7 +62,7 @@ function Layout({ children }) {
           </button>
         </div>
       </div>
-
+      
       <div className="main-content">
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           {children}
@@ -70,4 +73,3 @@ function Layout({ children }) {
 }
 
 export default Layout;
-

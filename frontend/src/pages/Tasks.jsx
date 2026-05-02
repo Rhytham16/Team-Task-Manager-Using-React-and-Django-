@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { getTokenRole, isAdminRole } from '../auth';
 
 function Tasks() {
   const [tasks, setTasks] = useState([]);
@@ -18,11 +19,13 @@ function Tasks() {
     return {};
   };
   const user = getUser();
-  const isAdmin = user.role === 'ADMIN';
+  const effectiveRole = user.role || getTokenRole() || '';
+  const isAdmin = isAdminRole(effectiveRole);
 
   const fetchData = async () => {
     try {
-      const response = await api.get(`/api/tasks/?assigned_to=${user.id}`);
+      const url = isAdmin ? '/api/tasks/' : `/api/tasks/?assigned_to=${user.id}`;
+      const response = await api.get(url);
       setTasks(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error fetching tasks');
@@ -102,4 +105,3 @@ function Tasks() {
 }
 
 export default Tasks;
-
