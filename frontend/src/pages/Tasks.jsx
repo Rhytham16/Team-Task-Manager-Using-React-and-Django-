@@ -23,7 +23,7 @@ function Tasks() {
   const fetchData = async () => {
     try {
       const response = await api.get(`/api/tasks/?assigned_to=${user.id}`);
-      setTasks(response.data);
+      setTasks(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error fetching tasks');
     } finally {
@@ -60,7 +60,7 @@ function Tasks() {
               </tr>
             </thead>
             <tbody>
-              {tasks.map(task => (
+              {tasks?.map(task => (
                 <tr key={task.id}>
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>

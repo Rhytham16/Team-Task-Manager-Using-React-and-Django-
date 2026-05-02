@@ -60,7 +60,7 @@ function ProjectDetails() {
     if (selectedUserIds.length === 0) return;
     try {
       await Promise.all(
-        selectedUserIds.map(userId => 
+        selectedUserIds?.map(userId => 
           api.post(`/api/projects/${id}/add-member/`, { user_id: userId })
         )
       );
@@ -98,7 +98,7 @@ function ProjectDetails() {
   const handleTaskStatusChange = async (taskId, newStatus) => {
     try {
       await api.patch(`/api/tasks/${taskId}/`, { status: newStatus });
-      setMemberTasks(memberTasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+      setMemberTasks(memberTasks?.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
     } catch (err) {
       const msg = err.response?.data ? JSON.stringify(err.response.data) : 'Error updating status';
       alert(`Status Update Failed: ${msg}`);
@@ -112,7 +112,7 @@ function ProjectDetails() {
 
     try {
       const response = await api.post(`/api/tasks/${taskId}/add-update/`, { message });
-      setMemberTasks(memberTasks.map(t => {
+      setMemberTasks(memberTasks?.map(t => {
         if (t.id === taskId) {
           return { ...t, updates: [response.data, ...(t.updates || [])] };
         }
@@ -247,9 +247,8 @@ function ProjectDetails() {
           <div className="card" style={{ background: 'var(--surface)', border: '1px solid var(--accent-light)', marginBottom: '32px' }}>
             <h4 style={{ marginBottom: '16px' }}>Select Members to Join</h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-              {allUsers
-                .filter(u => !project.team_members.some(m => m.id === u.id))
-                .map(u => (
+              {allUsers?.filter(u => !project.team_members.some(m => m.id === u.id))
+                ?.map(u => (
                   <label key={u.id} style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -290,7 +289,7 @@ function ProjectDetails() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-          {project.team_members.map(member => (
+          {project?.team_members?.map(member => (
             <div key={member.id} className="card" style={{ 
               marginBottom: 0, 
               padding: '24px', 
@@ -354,7 +353,7 @@ function ProjectDetails() {
               <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No tasks assigned in this project context.</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {memberTasks.map(task => (
+                {memberTasks?.map(task => (
                   <div key={task.id} style={{ border: '1px solid rgba(138, 98, 98, 0.1)', borderRadius: '16px', padding: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                       <div style={{ flex: 1 }}>
@@ -414,7 +413,7 @@ function ProjectDetails() {
                       <div style={{ marginTop: '20px' }}>
                         <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '12px' }}>Communication Thread</p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                          {task.updates.slice(0, 3).map(update => (
+                          {task?.updates?.slice(0, 3)?.map(update => (
                             <div key={update.id} style={{ fontSize: '13px', background: 'white', padding: '12px', borderRadius: '8px', border: '1px solid rgba(138, 98, 98, 0.05)' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                 <span style={{ fontWeight: '600', color: 'var(--primary)' }}>{update.user.name}</span>
@@ -463,7 +462,7 @@ function ProjectDetails() {
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: 'var(--text-muted)' }}>Assign To (Collaborators)</label>
                 <div style={{ border: '1px solid rgba(138, 98, 98, 0.1)', borderRadius: '12px', padding: '16px', maxHeight: '180px', overflowY: 'auto', background: 'var(--surface)' }}>
-                  {project.team_members.map(member => (
+                  {project?.team_members?.map(member => (
                     <label key={member.id} style={{ 
                       display: 'flex', 
                       alignItems: 'center', 

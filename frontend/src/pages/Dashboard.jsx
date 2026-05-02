@@ -105,7 +105,7 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.recent_global_tasks.map(task => {
+                    {data?.recent_global_tasks?.map(task => {
                       const latestUpdate = task.updates && task.updates.length > 0 ? task.updates[0] : null;
                       return (
                         <tr key={task.id}>
@@ -179,7 +179,7 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.my_assigned_tasks.map(task => (
+                    {data?.my_assigned_tasks?.map(task => (
                       <tr key={task.id}>
                         <td style={{ fontWeight: '600' }}>{task.title}</td>
                         <td>{task.project_title}</td>
@@ -204,7 +204,7 @@ function Dashboard() {
             <h3 style={{ fontSize: '18px', marginBottom: '24px' }}>My Active Projects</h3>
             {data?.my_projects?.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {data.my_projects.map(project => (
+                {data?.my_projects?.map(project => (
                   <Link 
                     key={project.id} 
                     to={`/projects/${project.id}`} 
@@ -256,7 +256,7 @@ function Dashboard() {
               <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No task history found for this member.</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {memberTasks.map(task => (
+                {memberTasks?.map(task => (
                   <div key={task.id} style={{ border: '1px solid rgba(138, 98, 98, 0.1)', borderRadius: '16px', padding: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                       <div>
@@ -273,7 +273,7 @@ function Dashboard() {
                       <div style={{ marginTop: '20px', borderTop: '1px solid rgba(138, 98, 98, 0.05)', paddingTop: '16px' }}>
                         <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--primary)', marginBottom: '12px', textTransform: 'uppercase' }}>Recent Updates</p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                          {task.updates.slice(0, 2).map(update => (
+                          {task?.updates?.slice(0, 2)?.map(update => (
                             <div key={update.id} style={{ fontSize: '13px', background: 'var(--surface)', padding: '12px', borderRadius: '8px' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                 <span style={{ fontWeight: '600' }}>{update.user.name}</span>

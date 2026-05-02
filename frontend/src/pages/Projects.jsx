@@ -28,7 +28,7 @@ function Projects() {
   const fetchProjects = async () => {
     try {
       const response = await api.get('/api/projects/');
-      setProjects(response.data);
+      setProjects(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error fetching projects');
     } finally {
@@ -105,7 +105,7 @@ function Projects() {
       )}
 
       <div className="grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '32px' }}>
-        {projects.map(project => (
+        {projects?.map(project => (
           <div key={project.id} className="card project-card" style={{ 
             display: 'flex', 
             flexDirection: 'column',
