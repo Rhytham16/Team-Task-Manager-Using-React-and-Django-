@@ -66,6 +66,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database Configuration
 # This will try to load from environment variables (Railway), otherwise use local defaults
+db_port = os.getenv('DB_PORT', '3306')
+if not db_port.isdigit():
+    db_port = '3306'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -73,7 +77,7 @@ DATABASES = {
         'USER': os.getenv('DB_USER', 'root'),
         'PASSWORD': os.getenv('DB_PASSWORD', ''),
         'HOST': os.getenv('DB_HOST', '127.0.0.1'),
-        'PORT': os.getenv('DB_PORT', '3306'),
+        'PORT': db_port,
     }
 }
 
