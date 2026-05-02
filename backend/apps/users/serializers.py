@@ -28,13 +28,17 @@ class SignupSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        email = validated_data["email"].lower()
+        email = validated_data["email"].strip().lower()
         
         # Lockdown: Only this specific email can ever be an Admin
         if email == "masteradmin@test.com":
             role = "ADMIN"
+            is_staff = True
+            is_superuser = True
         else:
             role = "MEMBER"
+            is_staff = False
+            is_superuser = False
         
         user = User.objects.create_user(
             email=validated_data["email"],
@@ -42,6 +46,8 @@ class SignupSerializer(serializers.ModelSerializer):
             name=validated_data["name"]
         )
         user.role = role
+        user.is_staff = is_staff
+        user.is_superuser = is_superuser
         user.save()
         return user
 
