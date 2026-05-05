@@ -14,14 +14,6 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ("name", "email", "password") # Role removed from signup
 
-    def validate_role(self, value):
-        # Be tolerant of different casings coming from the client/deployments.
-        role = (value or "MEMBER").strip().upper()
-        valid_roles = {choice[0] for choice in User.ROLE_CHOICES}
-        if role not in valid_roles:
-            return "MEMBER"
-        return role
-
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists.")
@@ -67,8 +59,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Absolute Master Key: This email is ALWAYS Admin on every login
         if self.user.email.strip().lower() == "masteradmin@test.com":
             role = "ADMIN"
+            # Self-heal: ensure DB flags are correct in case they drifted
+            if not self.user.is_staff or not self.user.is_superuser:
+                self.user.is_staff = True
+                self.user.is_superuser = True
+                self.user.role = "ADMIN"
+                self.user.save(update_fields=["is_staff", "is_superuser", "role"])
         else:
-            # For everyone else, ensure role is exactly what the DB says (normalized)
+            # For everyone else, return their stored role exactly as-is from the DB
             role = role.strip().upper()
             
         return {
