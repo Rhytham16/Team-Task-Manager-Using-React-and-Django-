@@ -12,7 +12,7 @@ function Projects() {
   const [description, setDescription] = useState('');
   
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const isAdmin = user.role === 'ADMIN';
+  const isAdmin = user.role === 'ADMIN' || user.is_superuser;
 
   const fetchProjects = async () => {
     try {

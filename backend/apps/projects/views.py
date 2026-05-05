@@ -22,7 +22,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == "ADMIN":
+        if user.role == "ADMIN" or user.is_superuser:
             return Project.objects.all()
         return Project.objects.filter(team_members=user)
 

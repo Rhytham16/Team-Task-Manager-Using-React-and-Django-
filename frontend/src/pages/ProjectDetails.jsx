@@ -24,13 +24,13 @@ function ProjectDetails() {
   const [assigningMembers, setAssigningMembers] = useState([]);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const isAdmin = user.role === 'ADMIN';
+  const isAdmin = user.role === 'ADMIN' || user.is_superuser;
 
   const fetchData = async () => {
     try {
       const [projectRes, usersRes] = await Promise.all([
         api.get(`/api/projects/${id}/`),
-        isAdmin ? api.get('/api/users/') : Promise.resolve({ data: [] })
+        isAdmin ? api.get('/api/auth/members/') : Promise.resolve({ data: [] })
       ]);
       setProject(projectRes.data);
       setAllUsers(usersRes.data);

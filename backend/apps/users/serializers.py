@@ -12,7 +12,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("name", "email", "password", "role")
+        fields = ("name", "email", "password") # Role removed from signup
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -24,7 +24,7 @@ class SignupSerializer(serializers.ModelSerializer):
             email=validated_data["email"],
             password=validated_data["password"],
             name=validated_data["name"],
-            role=validated_data.get("role", "MEMBER")
+            role="MEMBER" # Forced to MEMBER
         )
         return user
 
@@ -34,6 +34,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token["role"] = user.role
         token["email"] = user.email
+        token["is_superuser"] = user.is_superuser
         return token
 
     def validate(self, attrs):
@@ -45,6 +46,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "id": self.user.id,
                 "name": self.user.name,
                 "email": self.user.email,
-                "role": self.user.role
+                "role": self.user.role,
+                "is_superuser": self.user.is_superuser
             }
         }

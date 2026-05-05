@@ -27,6 +27,19 @@ function Dashboard() {
     fetchDashboard();
   }, []);
 
+  const handleRoleUpdate = async (userId, newRole) => {
+    try {
+      await api.patch(`/api/auth/manage/${userId}/role/`, { role: newRole });
+      // Refresh dashboard data
+      const response = await api.get('/api/dashboard/');
+      setData(response.data);
+      alert(`User role updated to ${newRole}`);
+    } catch (err) {
+      console.error('Error updating role:', err);
+      alert('Failed to update user role. Ensure you have superuser privileges.');
+    }
+  };
+
   const handleViewTasks = async (member) => {
     setSelectedMember(member);
     setIsModalOpen(true);
@@ -134,6 +147,61 @@ function Dashboard() {
               </div>
             </div>
           )}
+        </section>
+      )}
+
+      {/* Superuser Role Management */}
+      {data?.all_users_for_management && (
+        <section style={{ marginBottom: '56px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+            <span style={{ fontSize: '24px' }}>🔑</span>
+            <h2 style={{ margin: 0, fontSize: '22px' }}>Manage Workspace Roles</h2>
+          </div>
+          
+          <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+            <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(138, 98, 98, 0.1)', background: 'rgba(138, 98, 98, 0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '18px' }}>User Directory</h3>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>Superuser control over administrative privileges</p>
+              </div>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>User Name</th>
+                    <th>Email Address</th>
+                    <th>Current Role</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.all_users_for_management.map(u => (
+                    <tr key={u.id}>
+                      <td style={{ fontWeight: '600' }}>{u.name}</td>
+                      <td style={{ color: 'var(--text-muted)' }}>{u.email}</td>
+                      <td>
+                        <span className={`status-badge ${u.role === 'ADMIN' ? 'status-inprogress' : 'status-todo'}`}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <select 
+                          className="input" 
+                          style={{ fontSize: '12px', padding: '6px 12px', width: 'auto', display: 'inline-block' }}
+                          value={u.role}
+                          onChange={(e) => handleRoleUpdate(u.id, e.target.value)}
+                        >
+                          <option value="MEMBER">Member</option>
+                          <option value="ADMIN">Admin</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
       )}
 

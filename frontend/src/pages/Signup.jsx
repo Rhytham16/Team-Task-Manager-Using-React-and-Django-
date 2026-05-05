@@ -89,14 +89,6 @@ function Signup() {
             />
           </div>
 
-          <div style={{ marginBottom: '32px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: 'var(--text-muted)' }}>Workspace Role</label>
-            <select className="input" value={role} onChange={(e) => setRole(e.target.value)}>
-              <option value="MEMBER">Standard Team Member</option>
-              <option value="ADMIN">Workspace Administrator</option>
-            </select>
-          </div>
-
           <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px' }} disabled={loading}>
             {loading ? 'Initializing...' : 'Create My Profile'}
           </button>

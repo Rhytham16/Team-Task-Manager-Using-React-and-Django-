@@ -41,6 +41,18 @@ function Layout({ children }) {
             }}>
               {user.role === 'ADMIN' ? 'Administrator' : 'Team Member'}
             </span>
+            {user.is_superuser && (
+              <span className="status-badge" style={{ 
+                fontSize: '10px', 
+                padding: '4px 8px', 
+                marginTop: '4px', 
+                display: 'block',
+                background: '#4450b7',
+                color: 'white'
+              }}>
+                SUPERUSER
+              </span>
+            )}
           </div>
           <button className="btn btn-secondary" onClick={handleLogout} style={{ width: '100%', justifyContent: 'center' }}>
             Logout Session

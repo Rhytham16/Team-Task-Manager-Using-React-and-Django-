@@ -20,7 +20,18 @@ function Login() {
       localStorage.setItem('user', JSON.stringify(response.data.user));
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      const responseData = err.response?.data;
+      const errorMessage =
+        responseData?.message ||
+        responseData?.detail ||
+        responseData?.non_field_errors?.[0] ||
+        responseData?.email?.[0] ||
+        responseData?.password?.[0] ||
+        (err.response
+          ? `Login failed (HTTP ${err.response.status}).`
+          : `Can't reach the server. Check that the backend is running and that VITE_API_URL matches it.`);
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

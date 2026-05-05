@@ -26,7 +26,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == "ADMIN":
+        if user.role == "ADMIN" or user.is_superuser:
             queryset = Task.objects.all()
         else:
             queryset = Task.objects.filter(assigned_to=user)
@@ -94,7 +94,7 @@ class DashboardView(views.APIView):
             }
         }
         
-        if user.role == "ADMIN":
+        if user.role == "ADMIN" or user.is_superuser:
             global_status_counts = Task.objects.values("status").annotate(count=Count("id"))
             global_breakdown = {item["status"]: item["count"] for item in global_status_counts}
             
@@ -110,5 +110,9 @@ class DashboardView(views.APIView):
             
             response_data["recent_global_tasks"] = TaskSerializer(global_recent_tasks, many=True).data
             response_data["global_members"] = User.objects.filter(role="MEMBER").values("id", "name", "email")
+
+        if user.is_superuser:
+            # Provide all users for role management
+            response_data["all_users_for_management"] = User.objects.all().order_by('-role').values("id", "name", "email", "role")
             
         return Response(response_data)
