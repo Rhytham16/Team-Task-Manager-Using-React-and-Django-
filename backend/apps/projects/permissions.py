@@ -6,7 +6,7 @@ class IsProjectAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         role = (getattr(request.user, "role", "") or "").strip().upper()
-        return bool(role == "ADMIN" or obj.created_by == request.user)
+        return bool(role == "ADMIN" or request.user.is_superuser or obj.created_by == request.user)
 
 class IsProjectMember(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -14,4 +14,4 @@ class IsProjectMember(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         role = (getattr(request.user, "role", "") or "").strip().upper()
-        return bool(role == "ADMIN" or obj.team_members.filter(id=request.user.id).exists())
+        return bool(role == "ADMIN" or request.user.is_superuser or obj.team_members.filter(id=request.user.id).exists())

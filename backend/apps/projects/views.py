@@ -25,7 +25,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         if not user or not user.is_authenticated:
             return Project.objects.none()
         role = (getattr(user, "role", "") or "").strip().upper()
-        if role == "ADMIN":
+        if role == "ADMIN" or user.is_superuser:
             return Project.objects.all()
         return Project.objects.filter(team_members=user)
 

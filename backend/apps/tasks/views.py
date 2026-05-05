@@ -29,7 +29,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         if not user or not user.is_authenticated:
             return Task.objects.none()
         role = (getattr(user, "role", "") or "").strip().upper()
-        if role == "ADMIN":
+        if role == "ADMIN" or user.is_superuser:
             queryset = Task.objects.all()
         else:
             queryset = Task.objects.filter(assigned_to=user)
@@ -98,7 +98,7 @@ class DashboardView(views.APIView):
         }
         
         role = (getattr(user, "role", "") or "").strip().upper()
-        if role == "ADMIN":
+        if role == "ADMIN" or user.is_superuser:
             global_status_counts = Task.objects.values("status").annotate(count=Count("id"))
             global_breakdown = {item["status"]: item["count"] for item in global_status_counts}
             
