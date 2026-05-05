@@ -14,7 +14,8 @@ class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 class UserListView(generics.ListAPIView):
-    queryset = User.objects.filter(role="MEMBER")
+    # Be tolerant to inconsistent casing in stored data.
+    queryset = User.objects.filter(role__iexact="MEMBER")
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 

@@ -26,7 +26,10 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == "ADMIN" or user.is_superuser:
+        if not user or not user.is_authenticated:
+            return Task.objects.none()
+        role = (getattr(user, "role", "") or "").strip().upper()
+        if role == "ADMIN":
             queryset = Task.objects.all()
         else:
             queryset = Task.objects.filter(assigned_to=user)
@@ -94,12 +97,13 @@ class DashboardView(views.APIView):
             }
         }
         
-        if user.role == "ADMIN" or user.is_superuser:
+        role = (getattr(user, "role", "") or "").strip().upper()
+        if role == "ADMIN":
             global_status_counts = Task.objects.values("status").annotate(count=Count("id"))
             global_breakdown = {item["status"]: item["count"] for item in global_status_counts}
             
             response_data["global_stats"] = {
-                "total_members": User.objects.filter(role="MEMBER").count(),
+                "total_members": User.objects.filter(role__iexact="MEMBER").count(),
                 "total_projects": Project.objects.count(),
                 "total_tasks": Task.objects.count(),
                 "TODO": global_breakdown.get("TODO", 0),
@@ -109,10 +113,6 @@ class DashboardView(views.APIView):
             global_recent_tasks = Task.objects.all().order_by("-created_at")[:5]
             
             response_data["recent_global_tasks"] = TaskSerializer(global_recent_tasks, many=True).data
-            response_data["global_members"] = User.objects.filter(role="MEMBER").values("id", "name", "email")
-
-        if user.is_superuser:
-            # Provide all users for role management
-            response_data["all_users_for_management"] = User.objects.all().order_by('-role').values("id", "name", "email", "role")
+            response_data["global_members"] = User.objects.filter(role__iexact="MEMBER").values("id", "name", "email")
             
         return Response(response_data)

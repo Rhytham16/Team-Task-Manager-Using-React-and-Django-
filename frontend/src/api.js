@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Configure via `VITE_API_URL` (e.g. http://localhost:8000)
+// Change this if your backend runs on a different port
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const api = axios.create({

@@ -1,18 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { getTokenRole, isAdminRole } from '../auth';
 
 function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const isAdmin = user.role === 'ADMIN';
+  const getUser = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== 'undefined') {
+        return JSON.parse(userStr);
+      }
+    } catch (e) {
+      console.error("Failed to parse user data", e);
+    }
+    return {};
+  };
+  const user = getUser();
+  const effectiveRole = user.role || getTokenRole() || '';
+  const isAdmin = isAdminRole(effectiveRole);
 
   const fetchData = async () => {
     try {
-      const response = await api.get(`/api/tasks/?assigned_to=${user.id}`);
-      setTasks(response.data);
+      const url = isAdmin ? '/api/tasks/' : `/api/tasks/?assigned_to=${user.id}`;
+      const response = await api.get(url);
+      setTasks(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error fetching tasks');
     } finally {
@@ -49,7 +63,7 @@ function Tasks() {
               </tr>
             </thead>
             <tbody>
-              {tasks.map(task => (
+              {tasks?.map(task => (
                 <tr key={task.id}>
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -91,4 +105,3 @@ function Tasks() {
 }
 
 export default Tasks;
-

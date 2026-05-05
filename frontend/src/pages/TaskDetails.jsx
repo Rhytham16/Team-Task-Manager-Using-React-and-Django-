@@ -131,7 +131,7 @@ function TaskDetails() {
 
         <div className="updates-list" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {updates.length > 0 ? (
-            updates.map((update, idx) => (
+            updates?.map((update, idx) => (
               <div key={idx} style={{ 
                 padding: '24px', 
                 background: 'var(--surface)', 

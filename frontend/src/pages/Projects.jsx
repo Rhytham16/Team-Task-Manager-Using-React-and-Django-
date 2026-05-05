@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { getTokenRole, isAdminRole } from '../auth';
 
 function Projects() {
   const [projects, setProjects] = useState([]);
@@ -11,13 +12,25 @@ function Projects() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const isAdmin = user.role === 'ADMIN' || user.is_superuser;
+  const getUser = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== 'undefined') {
+        return JSON.parse(userStr);
+      }
+    } catch (e) {
+      console.error("Failed to parse user data", e);
+    }
+    return {};
+  };
+  const user = getUser();
+  const effectiveRole = user.role || getTokenRole() || '';
+  const isAdmin = isAdminRole(effectiveRole);
 
   const fetchProjects = async () => {
     try {
       const response = await api.get('/api/projects/');
-      setProjects(response.data);
+      setProjects(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error fetching projects');
     } finally {
@@ -94,7 +107,7 @@ function Projects() {
       )}
 
       <div className="grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '32px' }}>
-        {projects.map(project => (
+        {projects?.map(project => (
           <div key={project.id} className="card project-card" style={{ 
             display: 'flex', 
             flexDirection: 'column',
@@ -144,4 +157,3 @@ function Projects() {
 }
 
 export default Projects;
-

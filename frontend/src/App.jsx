@@ -4,11 +4,14 @@ import './styles.css';
 // Components
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleBasedHome from './components/RoleBasedHome';
+import AdminRoute from './components/AdminRoute';
 
 // Pages
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import Projects from './pages/Projects';
 import ProjectDetails from './pages/ProjectDetails';
 import Tasks from './pages/Tasks';
@@ -25,7 +28,16 @@ function App() {
         {/* Protected Routes */}
         <Route path="/" element={
           <ProtectedRoute>
-            <Layout><Dashboard /></Layout>
+            <RoleBasedHome>
+              <Layout><Dashboard /></Layout>
+            </RoleBasedHome>
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminRoute>
+              <Layout><AdminDashboard /></Layout>
+            </AdminRoute>
           </ProtectedRoute>
         } />
         <Route path="/projects" element={

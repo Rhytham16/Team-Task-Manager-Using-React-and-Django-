@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
+import { getTokenRole, isAdminRole } from '../auth';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -17,8 +18,11 @@ function Login() {
     try {
       const response = await api.post('/api/auth/login/', { email, password });
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      navigate('/');
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      const role = response.data.user?.role || getTokenRole();
+      navigate(isAdminRole(role) ? '/admin' : '/');
     } catch (err) {
       const responseData = err.response?.data;
       const errorMessage =
@@ -102,4 +106,3 @@ function Login() {
 }
 
 export default Login;
-

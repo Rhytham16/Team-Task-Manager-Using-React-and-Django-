@@ -1,9 +1,24 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { getTokenRole, isAdminRole } from '../auth';
 
 function Layout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const getUser = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== 'undefined') {
+        return JSON.parse(userStr);
+      }
+    } catch (e) {
+      console.error("Failed to parse user data", e);
+    }
+    return {};
+  };
+
+  const user = getUser();
+  const effectiveRole = user.role || getTokenRole() || '';
+  const isAdmin = isAdminRole(effectiveRole);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -36,10 +51,10 @@ function Layout({ children }) {
               padding: '4px 8px', 
               marginTop: '8px', 
               display: 'inline-block',
-              background: user.role === 'ADMIN' ? 'var(--accent-light)' : '#f3f4f6',
-              color: user.role === 'ADMIN' ? 'var(--primary)' : '#4b5563'
+              background: isAdmin ? 'var(--accent-light)' : '#f3f4f6',
+              color: isAdmin ? 'var(--primary)' : '#4b5563'
             }}>
-              {user.role === 'ADMIN' ? 'Administrator' : 'Team Member'}
+              {isAdmin ? 'Administrator' : 'Team Member'}
             </span>
             {user.is_superuser && (
               <span className="status-badge" style={{ 
@@ -70,4 +85,3 @@ function Layout({ children }) {
 }
 
 export default Layout;
-
