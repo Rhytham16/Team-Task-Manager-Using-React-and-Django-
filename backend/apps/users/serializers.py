@@ -12,7 +12,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("name", "email", "password") # Role removed from signup
+        fields = ("name", "email", "password", "role")
 
     def validate_role(self, value):
         # Be tolerant of different casings coming from the client/deployments.
@@ -28,18 +28,10 @@ class SignupSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        email = validated_data["email"].strip().lower()
-        
-        # Lockdown: Only this specific email can ever be an Admin
-        if email == "masteradmin@test.com":
-            role = "ADMIN"
-            is_staff = True
-            is_superuser = True
-        else:
-            role = "MEMBER"
-            is_staff = False
-            is_superuser = False
-        
+        role = validated_data.get("role", "MEMBER")
+        is_staff = role == "ADMIN"
+        is_superuser = role == "ADMIN"
+
         user = User.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
@@ -62,15 +54,19 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        role = self.user.role
-        
-        # Absolute Master Key: This email is ALWAYS Admin on every login
+
+        # masteradmin emergency account: always force ADMIN role and self-heal DB if needed
         if self.user.email.strip().lower() == "masteradmin@test.com":
             role = "ADMIN"
+            if self.user.role != "ADMIN" or not self.user.is_staff or not self.user.is_superuser:
+                self.user.role = "ADMIN"
+                self.user.is_staff = True
+                self.user.is_superuser = True
+                self.user.save(update_fields=["role", "is_staff", "is_superuser"])
         else:
-            # For everyone else, ensure role is exactly what the DB says (normalized)
-            role = role.strip().upper()
-            
+            # For all other users, use their stored role from the database (normalized)
+            role = self.user.role.strip().upper()
+
         return {
             "token": data["access"],
             "refresh": data["refresh"],
