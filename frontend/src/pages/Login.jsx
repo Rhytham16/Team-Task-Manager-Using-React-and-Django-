@@ -17,12 +17,18 @@ function Login() {
 
     try {
       const response = await api.post('/api/auth/login/', { email, password });
-      localStorage.setItem('token', response.data.token);
-      if (response.data.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      const userData = response.data.user;
+      const token = response.data.token || response.data.access;
+      
+      if (token && userData) {
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('token', token);
+        const role = userData.role || getTokenRole();
+        navigate(isAdminRole(role) ? '/admin' : '/');
+      } else {
+        console.error("Login response missing data:", response.data);
+        setError("Invalid response from server. Please contact support.");
       }
-      const role = response.data.user?.role || getTokenRole();
-      navigate(isAdminRole(role) ? '/admin' : '/');
     } catch (err) {
       const responseData = err.response?.data;
       const errorMessage =
