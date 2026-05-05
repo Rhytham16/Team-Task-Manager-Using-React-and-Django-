@@ -6,18 +6,16 @@ function Signup() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('MEMBER'); 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      await api.post('/api/auth/signup/', { name: username, email, password, role });
+      await api.post('/api/auth/signup/', { name: username, email, password });
       alert('Account initialized! You can now sign in.');
       navigate('/login');
     } catch (err) {
