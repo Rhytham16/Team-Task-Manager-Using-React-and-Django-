@@ -61,16 +61,25 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
+        email = (attrs.get("email") or "").strip().lower()
+
+        # Self-healing: ensure masteradmin@test.com always has correct DB values
+        # BEFORE super().validate() is called, because get_token() reads from the
+        # DB object directly and will embed whatever role is stored there.
+        if email == "masteradmin@test.com":
+            User.objects.filter(email__iexact="masteradmin@test.com").update(
+                role="ADMIN",
+                is_staff=True,
+                is_superuser=True,
+            )
+
         data = super().validate(attrs)
-        role = self.user.role
-        
-        # Absolute Master Key: This email is ALWAYS Admin on every login
+
         if self.user.email.strip().lower() == "masteradmin@test.com":
             role = "ADMIN"
         else:
-            # For everyone else, ensure role is exactly what the DB says (normalized)
-            role = role.strip().upper()
-            
+            role = self.user.role.strip().upper()
+
         return {
             "token": data["access"],
             "refresh": data["refresh"],
@@ -78,6 +87,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "id": self.user.id,
                 "name": self.user.name,
                 "email": self.user.email,
-                "role": role
-            }
+                "role": role,
+            },
         }
