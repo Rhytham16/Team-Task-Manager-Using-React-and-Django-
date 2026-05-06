@@ -17,19 +17,26 @@ function Login() {
 
     try {
       const response = await api.post('/api/auth/login/', { email, password });
-      const userData = response.data.user;
-      const token = response.data.token || response.data.access;
       
-      if (token && userData) {
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', token);
-        const role = userData.role || getTokenRole();
-        navigate(isAdminRole(role) ? '/admin' : '/');
-      } else {
-        console.error("Login response missing data:", response.data);
-        setError("Invalid response from server. Please contact support.");
+      // Ensure we have JSON data and not an HTML fallback
+      if (response.data && typeof response.data === 'object') {
+        const userData = response.data.user;
+        const token = response.data.token || response.data.access;
+        
+        if (token && userData) {
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('token', token);
+          const role = userData.role || getTokenRole();
+          navigate(isAdminRole(role) ? '/admin' : '/');
+          return;
+        }
       }
+      
+      console.error("Login response missing expected data structure:", response.data);
+      setError("The server returned an unexpected format. Please check if the backend is running.");
+      
     } catch (err) {
+      console.error("Login error object:", err);
       const responseData = err.response?.data;
       const errorMessage =
         responseData?.message ||
@@ -39,7 +46,7 @@ function Login() {
         responseData?.password?.[0] ||
         (err.response
           ? `Login failed (HTTP ${err.response.status}).`
-          : `Can't reach the server. Check that the backend is running and that VITE_API_URL matches it.`);
+          : `Can't reach the server. Ensure the backend is running at ${api.defaults.baseURL}`);
 
       setError(errorMessage);
     } finally {
